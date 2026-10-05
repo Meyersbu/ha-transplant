@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Transplant",
+        "description": "Adds a Transplant panel to the sidebar for administrators. Nothing is changed until you confirm a preview."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Transplant is already set up."
+    }
+  }
+}

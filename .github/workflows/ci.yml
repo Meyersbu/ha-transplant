@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python lint + core tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install ruff mypy pytest
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest tests --ignore=tests/integration -q
+
+  integration:
+    name: Integration tests (real Home Assistant)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest supported core (hacs.json "homeassistant").
+          - python: "3.12"
+            harness: "pytest-homeassistant-custom-component==0.13.205"
+          # Latest core: catches device registry / API churn early.
+          - python: "3.14"
+            harness: "pytest-homeassistant-custom-component"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          allow-prereleases: true
+      - run: pip install "${{ matrix.harness }}" mypy
+      # pycares >= 4.9 starts a helper thread that HA 2025.1's harness flags as leaked.
+      - if: matrix.python == '3.12'
+        run: pip install "pycares<4.9"
+      - run: mypy
+      - run: pytest tests -q
+
+  frontend:
+    name: Frontend lint + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Built panel is committed and up to date
+        run: git diff --exit-code custom_components/transplant/frontend

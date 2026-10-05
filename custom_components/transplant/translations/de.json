@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Transplant einrichten",
+        "description": "Fügt Administratoren ein Transplant-Panel in der Seitenleiste hinzu. Es wird nichts geändert, bevor du eine Vorschau bestätigst."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Transplant ist bereits eingerichtet."
+    }
+  }
+}

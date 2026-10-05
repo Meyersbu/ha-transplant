@@ -1,0 +1,38 @@
+name: Bug report
+description: Something did not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping. Please never paste secrets, tokens or addresses.
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.10.0"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Transplant version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Minimal config that reproduces it
+      description: The automation/dashboard snippet involved, with IDs anonymized.
+      render: yaml
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines from custom_components.transplant
+      render: text

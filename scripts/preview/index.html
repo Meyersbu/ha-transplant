@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  Local preview of the Transplant panel with a mocked `hass` object.
+  Serve the repository root (python -m http.server) and open
+  /scripts/preview/index.html, or ?dark for the dark theme.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transplant preview</title>
+    <style>
+      html, body { margin: 0; height: 100%; }
+      body {
+        --primary-color: #03a9f4; --rgb-primary-color: 3, 169, 244;
+        --primary-background-color: #fafafa; --secondary-background-color: #f0f0f0;
+        --card-background-color: #ffffff; --primary-text-color: #212121;
+        --secondary-text-color: #727272; --divider-color: rgba(0, 0, 0, .12);
+        --error-color: #db4437; --warning-color: #f4b400; --success-color: #43a047;
+        --text-primary-color: #fff; font-family: Roboto, "Segoe UI", sans-serif;
+      }
+      body.dark {
+        --primary-background-color: #111111; --secondary-background-color: #202020;
+        --card-background-color: #1c1c1c; --primary-text-color: #e1e1e1;
+        --secondary-text-color: #9b9b9b; --divider-color: rgba(225, 225, 225, .12);
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import "../../custom_components/transplant/frontend/transplant-panel.js";
+      if (location.search.includes("dark")) document.body.classList.add("dark");
+
+      const OLD = "a".repeat(32), NEW = "b".repeat(32);
+      const devices = [
+        { id: OLD, name: "Hallway climate sensor", manufacturer: "Aqara", model: "WSDCGQ11LM", area: "Hallway", integration: "zha", entity_count: 3, unavailable: true, used_in: 6, created_at: "2023-02-01T10:00:00+00:00" },
+        { id: NEW, name: "SNZB-02D", manufacturer: "Sonoff", model: "SNZB-02D", area: "Hallway", integration: "mqtt", entity_count: 3, unavailable: false, used_in: 0, created_at: "2026-10-05T09:12:00+00:00" },
+        { id: "c".repeat(32), name: "Living room lamp", manufacturer: "IKEA", model: "LED2003G10", area: "Living room", integration: "zha", entity_count: 1, unavailable: false, used_in: 9, created_at: "2022-05-01T10:00:00+00:00" },
+        { id: "d".repeat(32), name: "Front door", manufacturer: "Aqara", model: "MCCGQ11LM", area: "Entrance", integration: "zha", entity_count: 2, unavailable: false, used_in: 4, created_at: "2022-05-01T10:00:00+00:00" },
+        { id: "e".repeat(32), name: "Washing machine plug", manufacturer: "Shelly", model: "Plug S", area: "Basement", integration: "shelly", entity_count: 6, unavailable: false, used_in: 2, created_at: "2024-01-01T10:00:00+00:00" },
+      ];
+      const usage = [
+        { source_type: "automation", source_id: "1001", name: "Hallway too warm: turn on fan", entity_id: "automation.hallway_too_warm", editable: true, references: [] },
+        { source_type: "automation", source_id: "1002", name: "Humidity alert", entity_id: null, editable: true, references: [] },
+        { source_type: "automation", source_id: "1003", name: "Morning climate report", entity_id: null, editable: true, references: [] },
+        { source_type: "script", source_id: "climate_report", name: "Climate report", entity_id: "script.climate_report", editable: true, references: [] },
+        { source_type: "dashboard", source_id: "lovelace", name: "Overview", entity_id: null, editable: true, references: [] },
+        { source_type: "automation", source_id: "yaml:automation.legacy", name: "Legacy humidity (package)", entity_id: null, editable: false, references: [] },
+      ];
+      const suggestion = {
+        matches: [
+          { old_entity_id: "sensor.hallway_temperature", new_entity_id: "sensor.snzb_02d_temperature", score: 9, confidence: "high" },
+          { old_entity_id: "sensor.hallway_humidity", new_entity_id: "sensor.snzb_02d_humidity", score: 9, confidence: "high" },
+          { old_entity_id: "sensor.hallway_battery", new_entity_id: "sensor.snzb_02d_battery", score: 8, confidence: "high" },
+        ],
+        old_entities: [
+          { entity_id: "sensor.hallway_temperature", name: "Hallway temperature", domain: "sensor", device_class: "temperature", unit: "°C", state: "unavailable" },
+          { entity_id: "sensor.hallway_humidity", name: "Hallway humidity", domain: "sensor", device_class: "humidity", unit: "%", state: "unavailable" },
+          { entity_id: "sensor.hallway_battery", name: "Hallway battery", domain: "sensor", device_class: "battery", unit: "%", state: "unavailable" },
+        ],
+        new_entities: [
+          { entity_id: "sensor.snzb_02d_temperature", name: "SNZB-02D Temperature", domain: "sensor", device_class: "temperature", unit: "°C", state: "21.4" },
+          { entity_id: "sensor.snzb_02d_humidity", name: "SNZB-02D Humidity", domain: "sensor", device_class: "humidity", unit: "%", state: "48" },
+          { entity_id: "sensor.snzb_02d_battery", name: "SNZB-02D Battery", domain: "sensor", device_class: "battery", unit: "%", state: "100" },
+        ],
+      };
+      const ch = (path, o, n, kind = "value") => ({ path, old: o, new: n, kind, target_type: "entity" });
+      const plan = {
+        plan_id: "f".repeat(32), title: "Hallway climate sensor → SNZB-02D",
+        summary: { objects: 5, replacements: 14, by_type: { automation: 3, script: 1, dashboard: 1 }, read_only: 1, needs_review: 1 },
+        items: [
+          { source_type: "automation", source_id: "1001", name: "Hallway too warm: turn on fan", entity_id: null, editable: true, read_only_reason: null, review: [], changes: [
+            ch("triggers[0].entity_id", "sensor.hallway_temperature", "sensor.snzb_02d_temperature"),
+            ch("conditions[0].value_template", "sensor.hallway_humidity", "sensor.snzb_02d_humidity", "template") ] },
+          { source_type: "automation", source_id: "1002", name: "Humidity alert", entity_id: null, editable: true, read_only_reason: null, changes: [
+            ch("triggers[0].entity_id", "sensor.hallway_humidity", "sensor.snzb_02d_humidity"),
+            ch("actions[0].data.message", "sensor.hallway_humidity", "sensor.snzb_02d_humidity", "template") ],
+            review: [{ path: "triggers[1]", reason: "Device automation of integration 'zha'. The new device uses 'mqtt', so this trigger/action type may not exist on it. Left unchanged." }] },
+          { source_type: "automation", source_id: "1003", name: "Morning climate report", entity_id: null, editable: true, read_only_reason: null, review: [], changes: [
+            ch("actions[0].data.message", "sensor.hallway_temperature", "sensor.snzb_02d_temperature", "template"),
+            ch("actions[0].data.message", "sensor.hallway_humidity", "sensor.snzb_02d_humidity", "template") ] },
+          { source_type: "script", source_id: "climate_report", name: "Climate report", entity_id: null, editable: true, read_only_reason: null, review: [], changes: [
+            ch("sequence[0].data.message", "sensor.hallway_temperature", "sensor.snzb_02d_temperature", "template") ] },
+          { source_type: "dashboard", source_id: "lovelace", name: "Overview", entity_id: null, editable: true, read_only_reason: null, review: [], changes: [
+            ch("views[0].sections[1].cards[0].entity", "sensor.hallway_temperature", "sensor.snzb_02d_temperature"),
+            ch("views[0].sections[1].cards[1].entity", "sensor.hallway_humidity", "sensor.snzb_02d_humidity"),
+            ch("views[2].cards[3].entities[0]", "sensor.hallway_battery", "sensor.snzb_02d_battery") ] },
+          { source_type: "automation", source_id: "yaml:automation.legacy", name: "Legacy humidity (package)", entity_id: null, editable: false, read_only_reason: "Defined in YAML outside the UI editor (e.g. packages). Edit it manually.", review: [], changes: [
+            ch("trigger.entity_id", "sensor.hallway_humidity", "sensor.snzb_02d_humidity") ] },
+        ],
+      };
+      let snapshots = [];
+      const handlers = {
+        "transplant/overview": () => ({ devices, stats: { automation: 142, script: 31, scene: 12, dashboard: 4, read_only: 9 }, warnings: [], snapshots }),
+        "transplant/device_usage": () => ({ device_id: OLD, items: usage }),
+        "transplant/suggest": () => suggestion,
+        "transplant/preview": () => plan,
+        "transplant/apply": () => {
+          snapshots = [{ id: "9".repeat(32), created: new Date().toISOString(), title: plan.title, undone: false, objects: 5, replacements: 14 }];
+          return { snapshot_id: "9".repeat(32), objects: 5, replacements: 14, verification: { ok: true, leftovers: [], unavailable: [] } };
+        },
+        "transplant/undo": () => { snapshots = snapshots.map((s) => ({ ...s, undone: true })); return { restored: 5, conflicts: [] }; },
+      };
+      window.__calls = [];
+      const hass = {
+        language: "en",
+        callWS: async (msg) => {
+          window.__calls.push(msg);
+          await new Promise((r) => setTimeout(r, 30));
+          return structuredClone(handlers[msg.type](msg));
+        },
+      };
+      const panel = document.createElement("transplant-panel");
+      document.body.appendChild(panel);
+      panel.narrow = innerWidth < 870;
+      panel.hass = hass;
+    </script>
+  </body>
+</html>

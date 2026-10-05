@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Which problem would this solve?
+      description: Describe the situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Transplant to do?
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Scanner (finding references)
+        - Entity matching
+        - A new place to scan (helpers, YAML, …)
+        - Panel / UX
+        - Other
