@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Final
 
 DOMAIN: Final = "transplant"
-VERSION: Final = "0.1.0"
+VERSION: Final = "0.1.0b1"
 
 PANEL_URL: Final = "transplant"
 PANEL_TITLE: Final = "Transplant"
